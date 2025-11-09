@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Story Creator</title>
+    <title>Создание Story</title>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
@@ -19,6 +19,23 @@
             margin: 0 auto;
             text-align: center;
         }
+        .step {
+            background: rgba(255,255,255,0.1);
+            padding: 15px;
+            border-radius: 15px;
+            margin: 15px 0;
+            text-align: left;
+        }
+        .step-number {
+            background: #0088cc;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 10px;
+        }
         button {
             background: #0088cc;
             color: white;
@@ -28,71 +45,136 @@
             font-size: 18px;
             cursor: pointer;
             margin: 10px;
+            width: 100%;
         }
         button:hover {
             background: #0077bb;
+        }
+        .preview {
+            width: 200px;
+            height: 350px;
+            background: #333;
+            margin: 20px auto;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+        }
+        .hidden {
+            display: none;
         }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>📱 Создание Story</h1>
-        <p>Нажмите кнопку ниже чтобы создать Story</p>
         
-        <button onclick="createStory()">🎬 Опубликовать Story</button>
-        
-        <div id="status"></div>
+        <div id="step1">
+            <div class="step">
+                <span class="step-number">1</span>
+                <strong>Скачайте медиа</strong>
+                <p>Нажмите и удерживайте картинку ниже, чтобы сохранить её в галерею</p>
+            </div>
+            
+            <div class="preview">
+                📸 Ваше медиа<br>
+                (здесь будет preview)
+            </div>
+            
+            <button onclick="showStep2()">✅ Я сохранил(а) медиа</button>
+        </div>
+
+        <div id="step2" class="hidden">
+            <div class="step">
+                <span class="step-number">2</span>
+                <strong>Откройте Telegram</strong>
+                <p>Выйдите из этого окна и откройте основное приложение Telegram</p>
+            </div>
+            
+            <button onclick="showStep3()">✅ Я в Telegram</button>
+        </div>
+
+        <div id="step3" class="hidden">
+            <div class="step">
+                <span class="step-number">3</span>
+                <strong>Создайте Story</strong>
+                <p>Нажмите <b>«+»</b> → <b>«Story»</b> → <b>«Галерея»</b></p>
+            </div>
+            
+            <div class="preview">
+                ➕ Create Story<br>
+                📁 Gallery
+            </div>
+            
+            <button onclick="showStep4()">✅ Story создана</button>
+        </div>
+
+        <div id="step4" class="hidden">
+            <div class="step">
+                <span class="step-number">4</span>
+                <strong>Опубликуйте</strong>
+                <p>Добавьте текст/стикеры и нажмите <b>«Отправить»</b> → <b>«Мои истории»</b></p>
+            </div>
+            
+            <button onclick="showStep5()">✅ Опубликовано!</button>
+        </div>
+
+        <div id="step5" class="hidden">
+            <div class="step">
+                <span class="step-number">5</span>
+                <strong>Перешлите боту</strong>
+                <p>Откройте свою Story → нажмите <b>«Поделиться»</b> → найдите бота</p>
+            </div>
+            
+            <button onclick="completeTask()">🎉 Задание выполнено!</button>
+        </div>
+
+        <div id="final" class="hidden">
+            <h2>✅ Отлично!</h2>
+            <p>Теперь перешлите опубликованную Story нашему боту для проверки</p>
+            <button onclick="closeApp()">Закрыть</button>
+        </div>
     </div>
 
     <script>
         const tg = window.Telegram.WebApp;
-        
-        // Инициализация
         tg.expand();
-        tg.MainButton.setText("Готово");
-        tg.MainButton.hide();
 
-        function createStory() {
-            // Получаем file_id из параметров URL
-            const urlParams = new URLSearchParams(window.location.search);
-            const fileId = urlParams.get('file_id');
-            
-            try {
-                // Открываем редактор Stories
-                tg.openStoryEditor({
-                    media: {
-                        type: "photo",  // или "video"
-                        file: fileId    // file_id из бота
-                    },
-                    caption: "Промокоды Sora 2 🎟️",
-                    onDone: (result) => {
-                        document.getElementById('status').innerHTML = 
-                            '<p style="color: green;">✅ Story опубликована!</p>';
-                        
-                        // Отправляем данные в бот
-                        tg.sendData(JSON.stringify({
-                            action: "story_published",
-                            story_id: result.story_id,
-                            file_id: fileId
-                        }));
-                        
-                        tg.MainButton.show();
-                    },
-                    onCancel: () => {
-                        document.getElementById('status').innerHTML = 
-                            '<p style="color: orange;">❌ Публикация отменена</p>';
-                    }
-                });
-            } catch (error) {
-                document.getElementById('status').innerHTML = 
-                    '<p style="color: red;">❌ Ошибка: ' + error.message + '</p>';
-            }
+        function showStep2() {
+            document.getElementById('step1').classList.add('hidden');
+            document.getElementById('step2').classList.remove('hidden');
         }
 
-        // Обработка кнопки "Готово"
-        tg.MainButton.onClick(() => {
+        function showStep3() {
+            document.getElementById('step2').classList.add('hidden');
+            document.getElementById('step3').classList.remove('hidden');
+        }
+
+        function showStep4() {
+            document.getElementById('step3').classList.add('hidden');
+            document.getElementById('step4').classList.remove('hidden');
+        }
+
+        function showStep5() {
+            document.getElementById('step4').classList.add('hidden');
+            document.getElementById('step5').classList.remove('hidden');
+        }
+
+        function completeTask() {
+            document.getElementById('step5').classList.add('hidden');
+            document.getElementById('final').classList.remove('hidden');
+            
+            // Отправляем данные в бот
+            tg.sendData(JSON.stringify({
+                action: "story_guide_completed",
+                message: "Пользователь прошел инструкцию"
+            }));
+        }
+
+        function closeApp() {
             tg.close();
-        });
+        }
     </script>
 </body>
 </html>
