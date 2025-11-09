@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Story Creator</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 400px;
+            margin: 0 auto;
+            text-align: center;
+        }
+        button {
+            background: #0088cc;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 25px;
+            font-size: 18px;
+            cursor: pointer;
+            margin: 10px;
+        }
+        button:hover {
+            background: #0077bb;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📱 Создание Story</h1>
+        <p>Нажмите кнопку ниже чтобы создать Story</p>
+        
+        <button onclick="createStory()">🎬 Опубликовать Story</button>
+        
+        <div id="status"></div>
+    </div>
+
+    <script>
+        const tg = window.Telegram.WebApp;
+        
+        // Инициализация
+        tg.expand();
+        tg.MainButton.setText("Готово");
+        tg.MainButton.hide();
+
+        function createStory() {
+            // Получаем file_id из параметров URL
+            const urlParams = new URLSearchParams(window.location.search);
+            const fileId = urlParams.get('file_id');
+            
+            try {
+                // Открываем редактор Stories
+                tg.openStoryEditor({
+                    media: {
+                        type: "photo",  // или "video"
+                        file: fileId    // file_id из бота
+                    },
+                    caption: "Промокоды Sora 2 🎟️",
+                    onDone: (result) => {
+                        document.getElementById('status').innerHTML = 
+                            '<p style="color: green;">✅ Story опубликована!</p>';
+                        
+                        // Отправляем данные в бот
+                        tg.sendData(JSON.stringify({
+                            action: "story_published",
+                            story_id: result.story_id,
+                            file_id: fileId
+                        }));
+                        
+                        tg.MainButton.show();
+                    },
+                    onCancel: () => {
+                        document.getElementById('status').innerHTML = 
+                            '<p style="color: orange;">❌ Публикация отменена</p>';
+                    }
+                });
+            } catch (error) {
+                document.getElementById('status').innerHTML = 
+                    '<p style="color: red;">❌ Ошибка: ' + error.message + '</p>';
+            }
+        }
+
+        // Обработка кнопки "Готово"
+        tg.MainButton.onClick(() => {
+            tg.close();
+        });
+    </script>
+</body>
+</html>
