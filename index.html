@@ -6,19 +6,8 @@
     <title>Публикация истории Telegram</title>
     <script>
         window.onload = function() {
-            // Ссылка для открытия редактора историй Telegram
-            const telegramStoryUrl = 'tg://stories?action=publish';
-            
-            // Пытаемся открыть приложение Telegram
-            window.location.href = telegramStoryUrl;
-            
-            // Если приложение не установлено или не получилось открыть
-            setTimeout(function() {
-                if (!document.hidden) {
-                    // Открываем веб-версию Telegram
-                    window.location.href = 'https://web.telegram.org/';
-                }
-            }, 500);
+            // Сразу открываем редактор историй в приложении Telegram
+            window.location.href = 'tg://stories?action=publish';
         };
     </script>
 </head>
@@ -30,7 +19,7 @@
             📸 Опубликовать Story
         </button>
         <p style="margin-top: 20px; font-size: 14px; color: #666;">
-            Или откройте Telegram вручную и создайте историю
+            Приложение Telegram должно быть установлено на устройстве
         </p>
     </div>
 </body>
