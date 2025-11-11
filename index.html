@@ -3,27 +3,209 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Публикация истории</title>
+    <title>Опубликовать и получить алмазы</title>
+    <!-- Подключение Tailwind CSS для стилей -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Подключение Telegram Web Apps SDK -->
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--tg-theme-bg-color, #f4f4f5); /* Цвет фона из темы Telegram */
+            color: var(--tg-theme-text-color, #1f1f1f); /* Цвет текста из темы Telegram */
+            transition: background-color 0.3s, color 0.3s;
+        }
+        .container {
+            max-width: 400px;
+            margin: auto;
+            padding: 1.5rem;
+        }
+        .tg-button {
+            /* Используем цвета из темы Telegram для кнопки */
+            background-color: var(--tg-theme-button-color, #0088cc);
+            color: var(--tg-theme-button-text-color, white);
+            transition: background-color 0.15s;
+            box-shadow: 0 4px 6px -1px rgba(0, 136, 204, 0.5), 0 2px 4px -2px rgba(0, 136, 204, 0.5);
+        }
+        .tg-button:hover {
+            opacity: 0.9;
+        }
+        .status-box {
+            background-color: var(--tg-theme-secondary-bg-color, #e5e7eb);
+        }
+        .copy-box {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px;
+            border: 2px dashed var(--tg-theme-link-color, #0088cc);
+            background-color: var(--tg-theme-secondary-bg-color, #e5e7eb);
+            border-radius: 8px;
+            margin-top: 10px;
+        }
+    </style>
 </head>
-<body>
-    <div style="text-align: center; padding: 50px; font-family: Arial, sans-serif;">
-        <h1>📱 Публикация истории</h1>
-        <p>Для публикации истории с нашим медиа:</p>
-        
-        <div style="margin: 20px 0;">
-            <p>1. Откройте нашего бота в Telegram</p>
-            <p>2. Найдите нужное медиа в истории бота</p>
-            <p>3. Нажмите "Поделиться" → "Опубликовать историю"</p>
+<body class="p-4 md:p-8">
+
+    <div id="app" class="container bg-white rounded-2xl shadow-xl">
+        <!-- Заголовок и описание -->
+        <div class="text-center mb-8 p-4">
+            <h1 class="text-3xl font-extrabold text-blue-600 mb-2">💎 Опубликуйте историю — получите 10 алмазов!</h1>
+            <p class="text-gray-600 text-base mt-4">Опубликуй историю через кнопку ниже.</p>
         </div>
 
-        <button onclick="window.location.href = 'https://t.me/your_bot_username'" 
-                style="padding: 12px 24px; font-size: 16px; background-color: #0088cc; color: white; border: none; border-radius: 8px; cursor: pointer;">
-            📲 Открыть бота в Telegram
+        <!-- Инструкции и юзернейм для копирования -->
+        <div class="mb-8 p-4 rounded-xl status-box shadow-inner">
+            <h2 class="text-lg font-semibold mb-3 text-left">Как получить бонус:</h2>
+            <ol class="list-decimal list-inside space-y-2 text-left text-sm">
+                <li>Нажмите **"Опубликовать историю"** ниже, чтобы открыть редактор Telegram с готовым медиафайлом.</li>
+                <li>Опубликуйте историю.</li>
+                <li>После публикации, откройте свою историю, нажмите **«Поделиться»** (Share).</li>
+                <li>В списке получателей выберите нашего бота:</li>
+            </ol>
+            
+            <!-- Поле для копирования юзернейма -->
+            <div class="copy-box" id="copyBox">
+                <span id="botUsername" class="font-mono font-bold text-lg text-green-700 select-all mr-3">@sora2invites_bot</span>
+                <button onclick="copyUsername()"
+                        class="px-3 py-1 bg-green-500 text-white rounded-lg text-sm transition hover:bg-green-600 active:scale-95">
+                    Копировать
+                </button>
+            </div>
+            <p class="text-xs mt-3 text-red-500 font-medium">
+                **Только** при отправке опубликованной истории боту, бонус будет начислен!
+            </p>
+        </div>
+
+        <!-- Основная кнопка -->
+        <button id="shareButton" onclick="shareStory()"
+                class="tg-button w-full py-4 rounded-xl text-xl font-bold shadow-2xl">
+            🚀 Опубликовать историю
         </button>
-        
-        <p style="margin-top: 20px; font-size: 14px; color: #666;">
-            Медиа должно быть предварительно загружено в бота
-        </p>
+
+        <!-- Область для сообщений -->
+        <div id="message" class="mt-6 p-3 rounded-lg text-sm text-center hidden" role="alert"></div>
+
     </div>
+
+    <script>
+        // Константа: URL медиафайла для публикации в историю. 
+        // Замените на вашу актуальную ссылку.
+        const MEDIA_URL = "https://placehold.co/1080x1920/2563eb/ffffff?text=MiniApp+Promo+Story";
+
+        // Инициализация переменных Telegram WebApp
+        let WebApp = window.Telegram.WebApp;
+
+        document.addEventListener('DOMContentLoaded', () => {
+            // Инициализация WebApp
+            if (WebApp) {
+                WebApp.ready();
+                WebApp.expand();
+                showMessage('Приложение Telegram Web App готово.', 'info');
+                
+                // Применяем цвета из темы Telegram к элементам (если они поддерживаются)
+                const appContainer = document.getElementById('app');
+                // Устанавливаем цвет фона контейнера, чтобы он соответствовал теме, если body не справляется
+                appContainer.style.backgroundColor = WebApp.themeParams.secondary_bg_color || '#FFFFFF';
+                appContainer.style.color = WebApp.themeParams.text_color;
+
+            } else {
+                showMessage('⚠️ Не запущено в среде Telegram Web App. Кнопка неактивна.', 'error');
+                document.getElementById('shareButton').disabled = true;
+            }
+        });
+
+        /**
+         * Копирует юзернейм бота в буфер обмена.
+         */
+        function copyUsername() {
+            const username = document.getElementById('botUsername').textContent;
+            try {
+                // Используем document.execCommand('copy') для совместимости в iFrame
+                const el = document.createElement('textarea');
+                el.value = username;
+                document.body.appendChild(el);
+                el.select();
+                document.execCommand('copy');
+                document.body.removeChild(el);
+                
+                // Показываем подтверждение
+                showMessage('Юзернейм скопирован: ' + username, 'success');
+            } catch (err) {
+                showMessage('Ошибка копирования. Попробуйте скопировать вручную.', 'error');
+                console.error('Copy failed:', err);
+            }
+        }
+
+        /**
+         * Отображает сообщения о статусе или ошибках
+         * @param {string} text - Текст сообщения
+         * @param {string} type - Тип: 'success', 'error', 'info'
+         */
+        function showMessage(text, type) {
+            const msgBox = document.getElementById('message');
+            msgBox.textContent = text;
+            msgBox.className = "mt-6 p-3 rounded-lg text-sm text-center";
+
+            // Используем цвета из темы Telegram
+            if (type === 'success') {
+                msgBox.classList.add('bg-green-100', 'text-green-800');
+            } else if (type === 'error') {
+                msgBox.classList.add('bg-red-100', 'text-red-800');
+            } else { // info
+                msgBox.classList.add('bg-blue-100', 'text-blue-800');
+            }
+            msgBox.classList.remove('hidden');
+
+            // Скрываем сообщение через 4 секунды
+            setTimeout(() => {
+                msgBox.classList.add('hidden');
+            }, 4000);
+        }
+
+        /**
+         * Вызывает метод Telegram Web App для публикации истории.
+         */
+        function shareStory() {
+            if (!WebApp) {
+                showMessage('Ошибка: Web App SDK не загружен.', 'error');
+                return;
+            }
+
+            // Скрываем предыдущие сообщения
+            document.getElementById('message').classList.add('hidden');
+
+            try {
+                // Telegram Web App API для публикации в историю
+                // media_url: URL медиафайла (фото или видео)
+                WebApp.shareToStory({
+                    media_url: MEDIA_URL,
+                    media_areas: [
+                        {
+                            type: 'text',
+                            text: '10 Алмазов за Историю!',
+                            // Позиция сверху для привлечения внимания
+                            position: { x: 0.5, y: 0.15, width: 0.7, height: 0.1, rotation: 0 }, 
+                            text_style: 'bold',
+                            font_size: 32,
+                            text_color: '#FFD700' // Золотой цвет
+                        },
+                        {
+                            type: 'link',
+                            // Ссылка, которая может вести на Mini App или на бота
+                            url: 'https://t.me/sora2invites_bot', 
+                            position: { x: 0.5, y: 0.85, width: 0.8, height: 0.1, rotation: 0 },
+                            tooltip_text: 'Получить бонус!',
+                        }
+                    ]
+                });
+                showMessage('Запрос на публикацию отправлен. Проверьте редактор историй Telegram!', 'info');
+
+            } catch (error) {
+                // Если API-метод недоступен (например, устаревшая версия Telegram)
+                showMessage(`Ошибка: ${error.message}. Убедитесь, что у вас последняя версия Telegram.`, 'error');
+            }
+        }
+    </script>
 </body>
 </html>
