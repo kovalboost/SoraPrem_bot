@@ -1,298 +1,35 @@
 <!DOCTYPE html>
-<html>
+<html lang="ru">
 <head>
-    <title>Публикация Story</title>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <style>
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            margin: 0;
-            padding: 20px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-        }
-        
-        .container {
-            max-width: 400px;
-            width: 100%;
-            text-align: center;
-        }
-        
-        .media-preview {
-            width: 100%;
-            max-width: 300px;
-            height: 500px;
-            border-radius: 20px;
-            margin: 20px auto;
-            overflow: hidden;
-            background: #333;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-        }
-        
-        .media-preview img,
-        .media-preview video {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-        
-        .publish-btn {
-            background: #0088cc;
-            color: white;
-            border: none;
-            padding: 18px 40px;
-            border-radius: 25px;
-            font-size: 18px;
-            font-weight: 600;
-            cursor: pointer;
-            margin: 20px 0;
-            width: 100%;
-            max-width: 300px;
-            transition: all 0.3s ease;
-            box-shadow: 0 5px 15px rgba(0,136,204,0.4);
-        }
-        
-        .publish-btn:hover {
-            background: #0077bb;
-            transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(0,136,204,0.6);
-        }
-        
-        .publish-btn:active {
-            transform: translateY(0);
-        }
-        
-        .instructions {
-            background: rgba(255,255,255,0.1);
-            padding: 15px;
-            border-radius: 15px;
-            margin: 15px 0;
-            font-size: 14px;
-            text-align: left;
-        }
-        
-        .success-message {
-            background: rgba(255,255,255,0.1);
-            padding: 20px;
-            border-radius: 15px;
-            margin: 20px 0;
-            display: none;
-        }
-        
-        .loading {
-            display: none;
-            font-size: 16px;
-            margin: 20px 0;
-        }
-        
-        .error-message {
-            background: rgba(255,0,0,0.2);
-            padding: 15px;
-            border-radius: 15px;
-            margin: 15px 0;
-            display: none;
-            border: 1px solid rgba(255,0,0,0.5);
-        }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <h1>📱 Публикация Story</h1>
-        
-        <div class="instructions">
-            <strong>📝 Как опубликовать:</strong><br>
-            1. Нажмите кнопку ниже<br>
-            2. В открывшемся Telegram выберите "Story"<br>
-            3. Опубликуйте и перешлите боту
-        </div>
-        
-        <div id="mediaContainer" class="media-preview">
-            <div id="loadingMedia">Загрузка медиа...</div>
-        </div>
-        
-        <div id="loading" class="loading">
-            ⏳ Загрузка...
-        </div>
-        
-        <div id="errorMessage" class="error-message">
-            ❌ Ошибка загрузки медиа
-        </div>
-        
-        <button id="publishBtn" class="publish-btn" onclick="publishStory()">
-            🚀 Опубликовать Story
-        </button>
-        
-        <div id="successMessage" class="success-message">
-            ✅ Отлично! Теперь перешлите опубликованную Story боту для проверки задания.
-        </div>
-    </div>
-
+    <title>Публикация истории</title>
     <script>
-        const tg = window.Telegram.WebApp;
-        let mediaData = null;
-        
-        // Инициализация Web App
-        tg.expand();
-        tg.enableClosingConfirmation();
-        
-        // Получаем данные из initData
-        function getInitData() {
-            const initData = tg.initData;
-            const params = new URLSearchParams(initData);
-            const userStr = params.get('user');
-            if (userStr) {
-                return JSON.parse(decodeURIComponent(userStr));
-            }
-            return null;
-        }
-        
-        // Загружаем медиа из админки
-        async function loadMedia() {
-            try {
-                document.getElementById('loading').style.display = 'block';
-                
-                // Здесь должен быть запрос к вашему API для получения медиа
-                // Временно используем заглушку - в реальности нужно получать file_id из бота
-                const initData = getInitData();
-                
-                // Отправляем запрос к боту для получения медиа
-                const response = await fetch('/api/get-story-media', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        initData: tg.initData,
-                        user: initData
-                    })
-                });
-                
-                if (response.ok) {
-                    mediaData = await response.json();
-                    displayMedia(mediaData);
-                } else {
-                    throw new Error('Failed to load media');
-                }
-                
-            } catch (error) {
-                console.error('Error loading media:', error);
-                document.getElementById('errorMessage').style.display = 'block';
-                document.getElementById('publishBtn').disabled = true;
-            } finally {
-                document.getElementById('loading').style.display = 'none';
-            }
-        }
-        
-        // Отображаем медиа
-        function displayMedia(data) {
-            const container = document.getElementById('mediaContainer');
-            const loadingMedia = document.getElementById('loadingMedia');
+        // Немедленно открываем окно публикации истории Telegram
+        window.onload = function() {
+            // Пытаемся открыть Telegram Stories
+            const telegramUrl = 'tg://share/url?url=https://t.me&text=Публикуйте нашу историю!';
+            const fallbackUrl = 'https://t.me';
             
-            if (data.mediaUrl) {
-                loadingMedia.style.display = 'none';
-                
-                if (data.type === 'video') {
-                    const video = document.createElement('video');
-                    video.src = data.mediaUrl;
-                    video.controls = true;
-                    video.autoplay = true;
-                    video.muted = true;
-                    video.loop = true;
-                    container.appendChild(video);
-                } else if (data.type === 'photo') {
-                    const img = document.createElement('img');
-                    img.src = data.mediaUrl;
-                    img.alt = 'Story Media';
-                    container.appendChild(img);
-                } else if (data.type === 'animation') {
-                    const gif = document.createElement('img');
-                    gif.src = data.mediaUrl;
-                    gif.alt = 'Story GIF';
-                    container.appendChild(gif);
-                }
-            } else {
-                // Если нет URL, показываем инструкцию для скачивания
-                loadingMedia.innerHTML = '📸 Медиа для публикации<br><small>Сохраните это изображение</small>';
-            }
-        }
-        
-        // Публикация истории
-        function publishStory() {
-            // Показываем сообщение об успехе
-            document.getElementById('publishBtn').style.display = 'none';
-            document.getElementById('successMessage').style.display = 'block';
-            
-            // Отправляем данные в бот о завершении
-            tg.sendData(JSON.stringify({
-                action: "story_guide_completed",
-                timestamp: new Date().toISOString(),
-                media_type: mediaData?.type || 'unknown'
-            }));
-            
-            // Закрываем Web App через 3 секунды
-            setTimeout(() => {
-                tg.close();
-            }, 3000);
-        }
-        
-        // Альтернативная версия с прямым открытием Telegram
-        function openTelegramStory() {
-            // Этот метод пытается открыть создание Story напрямую
-            // В реальности это может не работать из-за ограничений браузера
-            
-            const telegramUrl = 'tg://story';
-            const fallbackUrl = 'https://t.me/story';
-            
-            // Пытаемся открыть десктопное приложение
+            // Открываем Telegram
             window.location.href = telegramUrl;
             
-            // Если не получилось, открываем веб-версию
-            setTimeout(() => {
-                window.open(fallbackUrl, '_blank');
+            // Если не получилось, открываем веб-версию Telegram
+            setTimeout(function() {
+                if (!document.hidden) {
+                    window.open(fallbackUrl, '_blank');
+                }
             }, 500);
-        }
-        
-        // Инициализация при загрузке
-        document.addEventListener('DOMContentLoaded', function() {
-            // Загружаем медиа
-            loadMedia();
-            
-            // Настраиваем кнопку публикации
-            const publishBtn = document.getElementById('publishBtn');
-            
-            // Альтернативный вариант кнопки
-            publishBtn.addEventListener('click', function() {
-                // Показываем инструкцию
-                document.getElementById('successMessage').style.display = 'block';
-                publishBtn.style.display = 'none';
-                
-                // Отправляем данные в бот
-                tg.sendData(JSON.stringify({
-                    action: "story_guide_completed", 
-                    message: "user_ready_to_publish",
-                    user_id: tg.initDataUnsafe.user?.id
-                }));
-            });
-        });
-        
-        // Обработка обратной связи от бота
-        tg.onEvent('viewportChanged', function(e) {
-            console.log('Viewport changed:', e);
-        });
-        
-        // Готовность Web App
-        tg.ready();
+        };
     </script>
+</head>
+<body>
+    <div style="text-align: center; padding: 50px; font-family: Arial, sans-serif;">
+        <h1>📱 Открываем Telegram...</h1>
+        <p>Если Telegram не открылся автоматически, нажмите кнопку ниже:</p>
+        <button onclick="window.open('https://t.me', '_blank')" style="padding: 10px 20px; font-size: 16px;">
+            Открыть Telegram
+        </button>
+    </div>
 </body>
 </html>
-
