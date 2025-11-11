@@ -3,23 +3,26 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Публикация истории Telegram</title>
-    <script>
-        window.onload = function() {
-            // Сразу открываем редактор историй в приложении Telegram
-            window.location.href = 'tg://stories?action=publish';
-        };
-    </script>
+    <title>Публикация истории</title>
 </head>
 <body>
     <div style="text-align: center; padding: 50px; font-family: Arial, sans-serif;">
-        <h1>📱 Открываем редактор историй Telegram...</h1>
-        <p>Если редактор историй не открылся автоматически, нажмите кнопку ниже:</p>
-        <button onclick="window.location.href = 'tg://stories?action=publish'" style="padding: 10px 20px; font-size: 16px; background-color: #0088cc; color: white; border: none; border-radius: 5px; cursor: pointer;">
-            📸 Опубликовать Story
+        <h1>📱 Публикация истории</h1>
+        <p>Для публикации истории с нашим медиа:</p>
+        
+        <div style="margin: 20px 0;">
+            <p>1. Откройте нашего бота в Telegram</p>
+            <p>2. Найдите нужное медиа в истории бота</p>
+            <p>3. Нажмите "Поделиться" → "Опубликовать историю"</p>
+        </div>
+
+        <button onclick="window.location.href = 'https://t.me/your_bot_username'" 
+                style="padding: 12px 24px; font-size: 16px; background-color: #0088cc; color: white; border: none; border-radius: 8px; cursor: pointer;">
+            📲 Открыть бота в Telegram
         </button>
+        
         <p style="margin-top: 20px; font-size: 14px; color: #666;">
-            Приложение Telegram должно быть установлено на устройстве
+            Медиа должно быть предварительно загружено в бота
         </p>
     </div>
 </body>
