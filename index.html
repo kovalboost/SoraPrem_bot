@@ -7,39 +7,25 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        /* * Используем переменные темы Telegram для фона и текста.
-         * Tailwind CSS (v3+) поддерживает @import в <style> 
-         * для базовых стилей, но для простоты оставим так.
-         * @import 'https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap';
-        */
         body {
             font-family: 'Inter', sans-serif;
-            /* Цвет фона страницы из темы Telegram */
             background-color: var(--tg-theme-bg-color, #f4f4f5);
-            /* Основной цвет текста из темы Telegram */
             color: var(--tg-theme-text-color, #1f1f1f);
             transition: background-color 0.3s, color 0.3s;
         }
         .tg-button {
-            /* Используем цвета из темы Telegram для кнопки */
             background-color: var(--tg-theme-button-color, #0088cc);
             color: var(--tg-theme-button-text-color, white);
             transition: background-color 0.15s;
             box-shadow: 0 4px 6px -1px rgba(0, 136, 204, 0.5), 0 2px 4px -2px rgba(0, 136, 204, 0.5);
         }
-        .tg-button:hover {
-            opacity: 0.9;
-        }
-        .status-box {
-            /* Вторичный цвет фона для блоков */
-            background-color: var(--tg-theme-secondary-bg-color, #e5e7eb);
-        }
+        .tg-button:hover { opacity: 0.9; }
+        .status-box { background-color: var(--tg-theme-secondary-bg-color, #e5e7eb); }
         .copy-box {
             display: flex;
             align-items: center;
             justify-content: space-between;
             padding: 10px;
-            /* Цвет ссылки для рамки */
             border: 2px dashed var(--tg-theme-link-color, #0088cc);
             background-color: var(--tg-theme-secondary-bg-color, #f3f4f6);
             border-radius: 8px;
@@ -87,15 +73,28 @@
     </div>
 
     <script>
-        "use strict"; // Включаем строгий режим
+        "use strict"; 
 
         // --- Константы ---
-        const MEDIA_URL = "https://85.209.9.150:8000/media/story.png";
+
+        // ❗️ ВНИМАНИЕ: Эта ссылка вызывает "черный экран", т.к. использует 'http://'.
+        // ❗️ Клиент Telegram (работающий по 'https://') блокирует ее.
+        // ❗️ Вам нужно настроить SSL (https) на своем сервере.
+        const MEDIA_URL = "http://85.209.9.150:8000/media/story.png";
+        
+        // 💡 Для теста, что код работает, временно вставьте HTTPS-ссылку:
+        // const MEDIA_URL = "https://i.imgur.com/tHJlwG5.jpeg";
+
         const BOT_LINK = "https://t.me/sora2invites_bot";
+
+        // === ВАША РЕДАКТИРУЕМАЯ ПОДПИСЬ ===
+        // 💡 Вот здесь вы можете редактировать рекламный текст для подписи
+        const STORY_CAPTION = "🚀 Присоединяйся к нашему боту и получай бонусы! Нажми на ссылку в истории, чтобы начать!";
+
 
         // --- Переменные ---
         let WebApp = window.Telegram.WebApp;
-        let messageTimeout = null; // Для очистки таймера сообщения
+        let messageTimeout = null; 
 
         // --- Инициализация ---
         document.addEventListener('DOMContentLoaded', () => {
@@ -113,25 +112,23 @@
             }
         });
 
+        // --- Функции ---
+
         /**
          * Копирует юзернейм бота в буфер обмена.
-         * Использует современный Clipboard API с фолбэком на execCommand.
          */
         async function copyUsername() {
             const username = document.getElementById('botUsername').textContent;
             
-            // Проверяем, доступен ли современный API в безопасном контексте
             if (navigator.clipboard && window.isSecureContext) {
                 try {
                     await navigator.clipboard.writeText(username);
                     showMessage('Юзернейм скопирован: ' + username, 'success');
                 } catch (err) {
                     console.error('Async copy failed:', err);
-                    // Если не удалось, пробуем старый метод
                     copyUsernameFallback(username);
                 }
             } else {
-                // Фолбэк для HTTP или старых браузеров
                 copyUsernameFallback(username);
             }
         }
@@ -143,7 +140,6 @@
             try {
                 const el = document.createElement('textarea');
                 el.value = username;
-                // Скрываем элемент
                 el.style.position = 'absolute';
                 el.style.left = '-9999px';
                 document.body.appendChild(el);
@@ -159,18 +155,14 @@
 
         /**
          * Отображает сообщения о статусе или ошибках
-         * @param {string} text - Текст сообщения
-         * @param {'success' | 'error' | 'info'} type - Тип сообщения
          */
         function showMessage(text, type) {
             const msgBox = document.getElementById('message');
             if (!msgBox) return;
 
             msgBox.textContent = text;
-            // Сбрасываем классы и делаем видимым
             msgBox.className = "mt-6 p-3 rounded-lg text-sm text-center";
 
-            // Устанавливаем классы в зависимости от типа
             if (type === 'success') {
                 msgBox.classList.add('bg-green-100', 'text-green-800');
             } else if (type === 'error') {
@@ -180,12 +172,9 @@
             }
             msgBox.classList.remove('hidden');
 
-            // Очищаем предыдущий таймер, если он был
             if (messageTimeout) {
                 clearTimeout(messageTimeout);
             }
-
-            // Скрываем сообщение через 4 секунды
             messageTimeout = setTimeout(() => {
                 msgBox.classList.add('hidden');
                 messageTimeout = null;
@@ -201,20 +190,21 @@
                 return;
             }
 
-            // Скрываем предыдущие сообщения
             document.getElementById('message').classList.add('hidden');
             if (messageTimeout) clearTimeout(messageTimeout);
 
             try {
-                // Telegram Web App API для публикации в историю
                 WebApp.shareToStory({
                     media_url: MEDIA_URL,
+                    
+                    // === ДОБАВЛЕНА ПОДПИСЬ ===
+                    // Используем константу, которую вы задали выше
+                    caption: STORY_CAPTION, 
+                    
                     media_areas: [
                         {
                             type: 'text',
                             text: '10 Алмазов за Историю!',
-                            // Позиция: {x, y, width, height} - в долях от 0 до 1
-                            // x: 0.5 (центр по X), y: 0.15 (15% от верха)
                             position: { x: 0.5, y: 0.15, width: 0.7, height: 0.1, rotation: 0 },
                             text_style: 'bold',
                             font_size: 32,
@@ -223,19 +213,15 @@
                         {
                             type: 'link',
                             url: BOT_LINK, 
-                            // Позиция: x: 0.5 (центр по X), y: 0.85 (85% от верха)
                             position: { x: 0.5, y: 0.85, width: 0.8, height: 0.1, rotation: 0 },
                             tooltip_text: 'Получить бонус!',
                         }
                     ]
                 });
                 
-                // Это сообщение может не успеть появиться, так как откроется редактор историй
-                // но полезно для отладки
                 console.log('Запрос на публикацию отправлен.');
                 
             } catch (error) {
-                // Если API-метод недоступен (например, устаревшая версия Telegram)
                 showMessage(`Ошибка: ${error.message}. Убедитесь, что у вас последняя версия Telegram.`, 'error');
                 console.error('shareToStory failed:', error);
             }
@@ -243,8 +229,3 @@
     </script>
 </body>
 </html>
-
-
-
-
-
