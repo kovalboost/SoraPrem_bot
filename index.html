@@ -90,7 +90,7 @@
         "use strict"; // Включаем строгий режим
 
         // --- Константы ---
-        const MEDIA_URL = "https://i.imgur.com/kInjltO.png";
+        const MEDIA_URL = new URLSearchParams(window.location.search).get("media_url");
         const BOT_LINK = "https://t.me/sora2invites_bot";
 
         // --- Переменные ---
@@ -243,3 +243,4 @@
     </script>
 </body>
 </html>
+
