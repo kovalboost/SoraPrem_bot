@@ -1,283 +1,162 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Опубликовать историю</title>
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <style>
-        body {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            margin: 0;
-            padding: 0;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        .container {
-            text-align: center;
-            padding: 40px 20px;
-            width: 100%;
-            max-width: 320px;
-        }
-        .title {
-            color: white;
-            font-size: 24px;
-            font-weight: 700;
-            margin-bottom: 16px;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
-        }
-        .description {
-            color: rgba(255, 255, 255, 0.9);
-            font-size: 16px;
-            line-height: 1.4;
-            margin-bottom: 40px;
-            text-shadow: 0 1px 2px rgba(0,0,0,0.2);
-        }
-        .button {
-            background: linear-gradient(45deg, #4facfe 0%, #00f2fe 100%);
-            color: white;
-            border: none;
-            padding: 20px 32px;
-            border-radius: 16px;
-            font-size: 18px;
-            font-weight: 600;
-            width: 100%;
-            cursor: pointer;
-            box-shadow: 0 8px 25px rgba(79, 172, 254, 0.4);
-            transition: all 0.3s ease;
-            position: relative;
-            overflow: hidden;
-        }
-        .button:disabled {
-            opacity: 0.7;
-            cursor: not-allowed;
-            transform: none;
-        }
-        .button:hover:not(:disabled) {
-            transform: translateY(-2px);
-            box-shadow: 0 12px 35px rgba(79, 172, 254, 0.6);
-        }
-        .button:active:not(:disabled) {
-            transform: translateY(0);
-        }
-        .button::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
-            transition: left 0.5s;
-        }
-        .button:hover::before {
-            left: 100%;
-        }
-    </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Опубликовать историю</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .container {
+            text-align: center;
+            padding: 40px 20px;
+            width: 100%;
+            max-width: 320px;
+        }
+        .title {
+            color: white;
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 16px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+        .description {
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 16px;
+            line-height: 1.4;
+            margin-bottom: 40px;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+        }
+        .button {
+            background: linear-gradient(45deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            border: none;
+            padding: 20px 32px;
+            border-radius: 16px;
+            font-size: 18px;
+            font-weight: 600;
+            width: 100%;
+            cursor: pointer;
+            box-shadow: 0 8px 25px rgba(79, 172, 254, 0.4);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        .button:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+            transform: none;
+        }
+        .button:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 35px rgba(79, 172, 254, 0.6);
+        }
+        .button:active:not(:disabled) {
+            transform: translateY(0);
+        }
+        .button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s;
+        }
+        .button:hover::before {
+            left: 100%;
+        }
+    </style>
 </head>
 <body>
-    <div class="container">
-        <h1 class="title"></h1> 
-        <p class="description"></p>
-        <button id="shareButton" class="button" disabled></button>
-    </div>
+    <div class="container">
+        <h1 class="title">💎 Опубликуйте историю</h1>
+        <p class="description">Нажмите кнопку ниже, чтобы поделиться историей и получить бонусы</p>
+        
+        <button id="shareButton" class="button" disabled>🚀 Опубликовать историю</button>
+    </div>
 
 <script>
-    const MEDIA_URL = "https://kovalboost.github.io/SoraPrem_bot/task1.png";
-    const STORY_CAPTION = "@SoraPrem_bot Удалять водяной знак легко";
-    
-    const LOCALE_DATA = {
-        'ru': {
-            title: "💎 Опубликуйте историю",
-            description: "НЕ Нажмите кнопку ниже, чтобы поделиться историей и получить бонус",
-            button_text: "🚀 Опубликовать историю",
-            button_loading: "⏳ Открываем редактор...",
-        },
-        'en': {
-            title: "💎 Publish Your Story",
-            description: "Tap the button below to share the story and receive your bonus.",
-            button_text: "🚀 Publish Story",
-            button_loading: "⏳ Opening Editor...",
-        },
-    };
-
-    let tg = null;
-    
-    function detectLanguage() {
-        console.log('=== LANGUAGE DETECTION DEBUG ===');
-        
-        // Способ 1: Telegram WebApp (приоритетный)
-        if (tg && tg.initDataUnsafe) {
-            console.log('Telegram initDataUnsafe:', tg.initDataUnsafe);
-            
-            // Проверяем разные возможные пути к языку
-            if (tg.initDataUnsafe.user?.language_code) {
-                const lang = tg.initDataUnsafe.user.language_code.toLowerCase();
-                console.log('Language from initDataUnsafe.user:', lang);
-                return lang;
-            }
-            
-            // Иногда язык может быть в других полях
-            if (tg.initDataUnsafe.language_code) {
-                const lang = tg.initDataUnsafe.language_code.toLowerCase();
-                console.log('Language from initDataUnsafe.language_code:', lang);
-                return lang;
-            }
-        }
-        
-        // Способ 2: Парсим initData строку
-        if (tg && tg.initData) {
-            console.log('Raw initData:', tg.initData);
-            try {
-                const params = new URLSearchParams(tg.initData);
-                const userStr = params.get('user');
-                if (userStr) {
-                    const userData = JSON.parse(decodeURIComponent(userStr));
-                    if (userData.language_code) {
-                        const lang = userData.language_code.toLowerCase();
-                        console.log('Language from parsed initData:', lang);
-                        return lang;
-                    }
-                }
-            } catch (e) {
-                console.log('Error parsing initData:', e);
-            }
-        }
-        
-        // Способ 3: Язык браузера (резервный)
-        const browserLang = navigator.language || navigator.userLanguage || 'ru';
-        console.log('Browser language:', browserLang);
-        
-        return browserLang.toLowerCase();
-    }
-    
-    function applyTranslations(lang) {
-        console.log('Applying translations for language:', lang);
-        
-        let langKey = 'ru'; // По умолчанию русский
-        
-        // Определяем ключ языка
-        if (lang.startsWith('ru')) {
-            langKey = 'ru';
-        } else if (lang.startsWith('en')) {
-            langKey = 'en';
-        } else if (lang.startsWith('uk')) {
-            langKey = 'uk';
-        }
-        // Можно добавить другие языки по необходимости
-        
-        const texts = LOCALE_DATA[langKey] || LOCALE_DATA['ru'];
-        
-        // Применяем переводы
-        document.querySelector('.title').textContent = texts.title;
-        document.querySelector('.description').textContent = texts.description;
-        document.getElementById('shareButton').textContent = texts.button_text;
-        
-        console.log('Applied texts:', texts);
-    }
-
-    function initTelegramApp() {
-        console.log('Initializing Telegram Web App...');
-        
-        if (!window.Telegram?.WebApp) {
-            console.error('Telegram Web App not available');
-            applyTranslations(navigator.language);
-            document.getElementById('shareButton').disabled = false;
-            return;
-        }
-        
-        tg = window.Telegram.WebApp;
-        tg.ready();
-        tg.expand();
-        
-        console.log('Telegram WebApp version:', tg.version);
-        console.log('Platform:', tg.platform);
-        
-        // Определяем язык и применяем переводы
-        const detectedLang = detectLanguage();
-        applyTranslations(detectedLang);
-        
-        // Включаем кнопку
-        document.getElementById('shareButton').disabled = false;
-        
-        // Дополнительная проверка функций
-        if (typeof tg.shareToStory !== 'function') {
-            console.warn('shareToStory not available');
-        }
-        if (typeof tg.sendData !== 'function') {
-            console.warn('sendData not available');
-        }
-    }
-    
-    function shareStory() {
-        if (!tg) {
-            alert('Telegram Web App не инициализирован');
-            return;
-        }
-        
-        const button = document.getElementById('shareButton');
-        const currentLang = detectLanguage();
-        const texts = LOCALE_DATA[currentLang.startsWith('ru') ? 'ru' : 
-                      currentLang.startsWith('en') ? 'en' : 'ru'];
-        
-        button.disabled = true;
-        button.textContent = texts.button_loading;
-        
-        try {
-            // Сначала отправляем данные боту
-            if (typeof tg.sendData === 'function') {
-                tg.sendData("story_reward_claim");
-                console.log('Data sent to bot');
-            }
-            
-            // Затем открываем редактор историй
-            if (typeof tg.shareToStory === 'function') {
-                tg.shareToStory(MEDIA_URL, { text: STORY_CAPTION });
-                console.log('Story editor opened');
-            } else {
-                console.warn('shareToStory not available');
-                // Альтернативное действие, если функция недоступна
-                tg.showPopup({
-                    title: texts.title,
-                    message: 'Функция публикации в историю временно недоступна',
-                    buttons: [{ type: 'ok' }]
-                });
-            }
-            
-            // Восстанавливаем кнопку через 5 секунд
-            setTimeout(() => {
-                button.disabled = false;
-                button.textContent = texts.button_text;
-            }, 5000);
-            
-        } catch (error) {
-            console.error('Error:', error);
-            button.disabled = false;
-            button.textContent = texts.button_text;
-            
-            // Показываем ошибку пользователю
-            tg.showPopup({
-                title: 'Ошибка',
-                message: 'Произошла ошибка при публикации',
-                buttons: [{ type: 'ok' }]
-            });
-        }
-    }
-    
-    // Инициализация при загрузке
-    document.addEventListener('DOMContentLoaded', () => {
-        // Сначала показываем русскую версию по умолчанию
-        applyTranslations('ru');
-        
-        // Затем инициализируем Telegram App
-        initTelegramApp();
-        
-        // Назначаем обработчик кнопки
-        document.getElementById('shareButton').addEventListener('click', shareStory);
-    });
+    // Константы
+    const MEDIA_URL = "https://kovalboost.github.io/SoraPrem_bot/task1.png";
+    const STORY_CAPTION = "🎟 Покупай промокоды  https://t.me/sora2invites_bot";
+    
+    let tg = null;
+    
+    function initTelegramApp() {
+        console.log('Initializing Telegram Web App...');
+        
+        if (!window.Telegram || !window.Telegram.WebApp) {
+            console.error('Telegram Web App not available');
+            return;
+        }
+        
+        tg = window.Telegram.WebApp;
+        
+        tg.ready();
+        tg.expand();
+        
+        console.log('Telegram Web App initialized:', {
+            version: tg.version,
+            platform: tg.platform
+        });
+        
+        // Проверяем поддержку
+        if (typeof tg.shareToStory !== 'function') {
+            console.error('Required function (shareToStory) not available');
+            return;
+        }
+        
+        // Включаем кнопку
+        document.getElementById('shareButton').disabled = false;
+    }
+    
+    function shareStory() {
+        if (!tg) {
+            console.error('WebApp not initialized');
+            return;
+        }
+        
+        const button = document.getElementById('shareButton');
+        button.disabled = true;
+        button.textContent = '⏳ Открываем редактор...';
+        
+        try {
+            // Открываем редактор историй. 
+            tg.shareToStory(MEDIA_URL, {
+                text: STORY_CAPTION
+            });
+            
+            console.log('shareToStory called');
+            
+            // Восстанавливаем кнопку (на случай, если пользователь вернется)
+            setTimeout(() => {
+                button.disabled = false;
+                button.textContent = '🚀 Опубликовать историю';
+            }, 5000);
+            
+        } catch (error) {
+            console.error('Error:', error);
+            button.disabled = false;
+            button.textContent = '🚀 Опубликовать историю';
+        }
+    }
+    
+    // Запускаем инициализацию при загрузке
+    document.addEventListener('DOMContentLoaded', () => {
+        initTelegramApp();
+        document.getElementById('shareButton').addEventListener('click', shareStory);
+    });
 </script>
 </body>
 </html>
