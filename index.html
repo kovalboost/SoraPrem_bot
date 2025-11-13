@@ -82,20 +82,17 @@
     <div class="container">
         <h1 class="title"></h1> 
         <p class="description"></p>
-        
         <button id="shareButton" class="button" disabled></button>
     </div>
 
 <script>
-    // --- ❗️ ШАГ 1: ОБЪЕКТ ПЕРЕВОДОВ И КОНСТАНТЫ ❗️ ---
     const MEDIA_URL = "https://kovalboost.github.io/SoraPrem_bot/task1.png";
     const STORY_CAPTION = "@SoraPrem_bot Удалять водяной знак легко";
     
-    // Объект с переводами
     const LOCALE_DATA = {
         'ru': {
             title: "💎 Опубликуйте историю",
-            description: "Нажмите кнопку ниже, чтобы поделиться историей и получить бонус",
+            description: "НЕ Нажмите кнопку ниже, чтобы поделиться историей и получить бонус",
             button_text: "🚀 Опубликовать историю",
             button_loading: "⏳ Открываем редактор...",
         },
@@ -104,18 +101,91 @@
             description: "Tap the button below to share the story and receive your bonus.",
             button_text: "🚀 Publish Story",
             button_loading: "⏳ Opening Editor...",
-        }
+        },
     };
-    // ---------------------------------------------------
-    
+
     let tg = null;
     
+    function detectLanguage() {
+        console.log('=== LANGUAGE DETECTION DEBUG ===');
+        
+        // Способ 1: Telegram WebApp (приоритетный)
+        if (tg && tg.initDataUnsafe) {
+            console.log('Telegram initDataUnsafe:', tg.initDataUnsafe);
+            
+            // Проверяем разные возможные пути к языку
+            if (tg.initDataUnsafe.user?.language_code) {
+                const lang = tg.initDataUnsafe.user.language_code.toLowerCase();
+                console.log('Language from initDataUnsafe.user:', lang);
+                return lang;
+            }
+            
+            // Иногда язык может быть в других полях
+            if (tg.initDataUnsafe.language_code) {
+                const lang = tg.initDataUnsafe.language_code.toLowerCase();
+                console.log('Language from initDataUnsafe.language_code:', lang);
+                return lang;
+            }
+        }
+        
+        // Способ 2: Парсим initData строку
+        if (tg && tg.initData) {
+            console.log('Raw initData:', tg.initData);
+            try {
+                const params = new URLSearchParams(tg.initData);
+                const userStr = params.get('user');
+                if (userStr) {
+                    const userData = JSON.parse(decodeURIComponent(userStr));
+                    if (userData.language_code) {
+                        const lang = userData.language_code.toLowerCase();
+                        console.log('Language from parsed initData:', lang);
+                        return lang;
+                    }
+                }
+            } catch (e) {
+                console.log('Error parsing initData:', e);
+            }
+        }
+        
+        // Способ 3: Язык браузера (резервный)
+        const browserLang = navigator.language || navigator.userLanguage || 'ru';
+        console.log('Browser language:', browserLang);
+        
+        return browserLang.toLowerCase();
+    }
+    
+    function applyTranslations(lang) {
+        console.log('Applying translations for language:', lang);
+        
+        let langKey = 'ru'; // По умолчанию русский
+        
+        // Определяем ключ языка
+        if (lang.startsWith('ru')) {
+            langKey = 'ru';
+        } else if (lang.startsWith('en')) {
+            langKey = 'en';
+        } else if (lang.startsWith('uk')) {
+            langKey = 'uk';
+        }
+        // Можно добавить другие языки по необходимости
+        
+        const texts = LOCALE_DATA[langKey] || LOCALE_DATA['ru'];
+        
+        // Применяем переводы
+        document.querySelector('.title').textContent = texts.title;
+        document.querySelector('.description').textContent = texts.description;
+        document.getElementById('shareButton').textContent = texts.button_text;
+        
+        console.log('Applied texts:', texts);
+    }
+
     function initTelegramApp() {
         console.log('Initializing Telegram Web App...');
         
-        if (!window.Telegram || !window.Telegram.WebApp) {
+        if (!window.Telegram?.WebApp) {
             console.error('Telegram Web App not available');
-            applyTranslations('ru'); // Применяем русский по умолчанию
+            applyTranslations(navigator.language);
+            document.getElementById('shareButton').disabled = false;
             return;
         }
         
@@ -123,89 +193,61 @@
         tg.ready();
         tg.expand();
         
-        // --- 🔥 ИСПРАВЛЕННАЯ ЛОГИКА ОПРЕДЕЛЕНИЯ ЯЗЫКА 🔥 ---
-        let userLang = 'ru'; // Язык по умолчанию
+        console.log('Telegram WebApp version:', tg.version);
+        console.log('Platform:', tg.platform);
         
-        // Способ 1: Из initData (основной способ)
-        if (tg.initDataUnsafe && tg.initDataUnsafe.user && tg.initDataUnsafe.user.language_code) {
-            userLang = tg.initDataUnsafe.user.language_code.toLowerCase();
-        }
-        // Способ 2: Из параметров запуска (резервный)
-        else if (tg.initData) {
-            const params = new URLSearchParams(tg.initData);
-            const userParam = params.get('user');
-            if (userParam) {
-                try {
-                    const userData = JSON.parse(userParam);
-                    if (userData.language_code) {
-                        userLang = userData.language_code.toLowerCase();
-                    }
-                } catch (e) {
-                    console.log('Error parsing user data:', e);
-                }
-            }
-        }
-        
-        console.log('Detected language:', userLang);
-        
-        // Определяем ключ языка
-        const langKey = userLang.startsWith('ru') ? 'ru' : 'en';
-        
-        // Применяем переводы
-        applyTranslations(langKey);
-        // ---------------------------------------------
-        
-        // Проверяем поддержку функций
-        if (typeof tg.shareToStory !== 'function' || typeof tg.sendData !== 'function') {
-            console.error('Required functions not available');
-            return;
-        }
+        // Определяем язык и применяем переводы
+        const detectedLang = detectLanguage();
+        applyTranslations(detectedLang);
         
         // Включаем кнопку
         document.getElementById('shareButton').disabled = false;
-    }
-    
-    // 🔥 НОВАЯ ФУНКЦИЯ: Применение переводов
-    function applyTranslations(langKey) {
-        const texts = LOCALE_DATA[langKey] || LOCALE_DATA['ru'];
         
-        document.querySelector('.title').textContent = texts.title;
-        document.querySelector('.description').textContent = texts.description;
-        document.getElementById('shareButton').textContent = texts.button_text;
+        // Дополнительная проверка функций
+        if (typeof tg.shareToStory !== 'function') {
+            console.warn('shareToStory not available');
+        }
+        if (typeof tg.sendData !== 'function') {
+            console.warn('sendData not available');
+        }
     }
     
     function shareStory() {
         if (!tg) {
-            console.error('WebApp not initialized');
+            alert('Telegram Web App не инициализирован');
             return;
         }
         
         const button = document.getElementById('shareButton');
-        
-        // --- ЛОКАЛИЗАЦИЯ ДЛЯ ТЕКСТА ЗАГРУЗКИ ---
-        let userLang = 'ru';
-        if (tg.initDataUnsafe && tg.initDataUnsafe.user && tg.initDataUnsafe.user.language_code) {
-            userLang = tg.initDataUnsafe.user.language_code.toLowerCase();
-        }
-        const langKey = userLang.startsWith('ru') ? 'ru' : 'en';
-        const texts = LOCALE_DATA[langKey] || LOCALE_DATA['ru'];
-        // ------------------------------------------
+        const currentLang = detectLanguage();
+        const texts = LOCALE_DATA[currentLang.startsWith('ru') ? 'ru' : 
+                      currentLang.startsWith('en') ? 'en' : 'ru'];
         
         button.disabled = true;
         button.textContent = texts.button_loading;
         
         try {
-            // 1. СНАЧАЛА отправляем сигнал боту
-            tg.sendData("story_reward_claim");
+            // Сначала отправляем данные боту
+            if (typeof tg.sendData === 'function') {
+                tg.sendData("story_reward_claim");
+                console.log('Data sent to bot');
+            }
             
-            // 2. ПОТОМ открываем редактор историй
-            tg.shareToStory(MEDIA_URL, {
-                text: STORY_CAPTION
-            });
+            // Затем открываем редактор историй
+            if (typeof tg.shareToStory === 'function') {
+                tg.shareToStory(MEDIA_URL, { text: STORY_CAPTION });
+                console.log('Story editor opened');
+            } else {
+                console.warn('shareToStory not available');
+                // Альтернативное действие, если функция недоступна
+                tg.showPopup({
+                    title: texts.title,
+                    message: 'Функция публикации в историю временно недоступна',
+                    buttons: [{ type: 'ok' }]
+                });
+            }
             
-            console.log('sendData and shareToStory called');
-            
-            // Восстанавливаем кнопку
+            // Восстанавливаем кнопку через 5 секунд
             setTimeout(() => {
                 button.disabled = false;
                 button.textContent = texts.button_text;
@@ -215,11 +257,25 @@
             console.error('Error:', error);
             button.disabled = false;
             button.textContent = texts.button_text;
+            
+            // Показываем ошибку пользователю
+            tg.showPopup({
+                title: 'Ошибка',
+                message: 'Произошла ошибка при публикации',
+                buttons: [{ type: 'ok' }]
+            });
         }
     }
     
+    // Инициализация при загрузке
     document.addEventListener('DOMContentLoaded', () => {
+        // Сначала показываем русскую версию по умолчанию
+        applyTranslations('ru');
+        
+        // Затем инициализируем Telegram App
         initTelegramApp();
+        
+        // Назначаем обработчик кнопки
         document.getElementById('shareButton').addEventListener('click', shareStory);
     });
 </script>
