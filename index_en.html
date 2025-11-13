@@ -92,7 +92,7 @@
         <!-- Semi-transparent block for title and description -->
         <div class="content-block">
             <h1 class="title">💎 Publish Your Story</h1>
-            <p class="description">Tap the button below to share the story and receive your bonus</p>
+            <p class="description">Tap the button below and publish your story on Telegram!</p>
         </div>
         
         <!-- Button below the block -->
@@ -102,7 +102,7 @@
 <script>
     // Constants
     const MEDIA_URL = "https://kovalboost.github.io/SoraPrem_bot/task1.png";
-    const STORY_CAPTION = "🎟 Buy promo codes  https://t.me/sora2invites_bot";
+    const STORY_CAPTION = "<b>@SoraPrem_bot 💧 Remove watermark from Sora 2</b>";
     
     let tg = null;
     
@@ -155,13 +155,13 @@
             // Restore button (in case user returns)
             setTimeout(() => {
                 button.disabled = false;
-                button.textContent = '🚀 Publish Story';
+                button.textContent = '🚀 Get started';
             }, 5000);
             
         } catch (error) {
             console.error('Error:', error);
             button.disabled = false;
-            button.textContent = '🚀 Publish Story';
+            button.textContent = '🚀 Get started';
         }
     }
     
