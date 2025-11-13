@@ -115,6 +115,7 @@
         
         if (!window.Telegram || !window.Telegram.WebApp) {
             console.error('Telegram Web App not available');
+            applyTranslations('ru'); // Применяем русский по умолчанию
             return;
         }
         
@@ -122,21 +123,39 @@
         tg.ready();
         tg.expand();
         
-        // --- 🔥 ЛОГИКА ОПРЕДЕЛЕНИЯ ЯЗЫКА 🔥 ---
-        // Получаем язык, по умолчанию RU
-        const userLang = tg.initDataUnsafe.user && tg.initDataUnsafe.user.language_code ? tg.initDataUnsafe.user.language_code.toLowerCase() : 'ru';
-        const langKey = userLang.startsWith('ru') ? 'ru' : 'en'; // Используем 'ru' или 'en'
-        const texts = LOCALE_DATA[langKey] || LOCALE_DATA['ru']; // Выбираем локализованный текст
+        // --- 🔥 ИСПРАВЛЕННАЯ ЛОГИКА ОПРЕДЕЛЕНИЯ ЯЗЫКА 🔥 ---
+        let userLang = 'ru'; // Язык по умолчанию
         
-        // --- ПРИМЕНЕНИЕ ТЕКСТОВ ---
-        // ❗️ Теперь мы ищем элементы и ЗАПОЛНЯЕМ их текстом из объекта texts
-        document.querySelector('.title').textContent = texts.title;
-        document.querySelector('.description').textContent = texts.description;
-        document.getElementById('shareButton').textContent = texts.button_text;
+        // Способ 1: Из initData (основной способ)
+        if (tg.initDataUnsafe && tg.initDataUnsafe.user && tg.initDataUnsafe.user.language_code) {
+            userLang = tg.initDataUnsafe.user.language_code.toLowerCase();
+        }
+        // Способ 2: Из параметров запуска (резервный)
+        else if (tg.initData) {
+            const params = new URLSearchParams(tg.initData);
+            const userParam = params.get('user');
+            if (userParam) {
+                try {
+                    const userData = JSON.parse(userParam);
+                    if (userData.language_code) {
+                        userLang = userData.language_code.toLowerCase();
+                    }
+                } catch (e) {
+                    console.log('Error parsing user data:', e);
+                }
+            }
+        }
         
+        console.log('Detected language:', userLang);
+        
+        // Определяем ключ языка
+        const langKey = userLang.startsWith('ru') ? 'ru' : 'en';
+        
+        // Применяем переводы
+        applyTranslations(langKey);
         // ---------------------------------------------
         
-        // Проверяем поддержку
+        // Проверяем поддержку функций
         if (typeof tg.shareToStory !== 'function' || typeof tg.sendData !== 'function') {
             console.error('Required functions not available');
             return;
@@ -144,6 +163,15 @@
         
         // Включаем кнопку
         document.getElementById('shareButton').disabled = false;
+    }
+    
+    // 🔥 НОВАЯ ФУНКЦИЯ: Применение переводов
+    function applyTranslations(langKey) {
+        const texts = LOCALE_DATA[langKey] || LOCALE_DATA['ru'];
+        
+        document.querySelector('.title').textContent = texts.title;
+        document.querySelector('.description').textContent = texts.description;
+        document.getElementById('shareButton').textContent = texts.button_text;
     }
     
     function shareStory() {
@@ -155,13 +183,16 @@
         const button = document.getElementById('shareButton');
         
         // --- ЛОКАЛИЗАЦИЯ ДЛЯ ТЕКСТА ЗАГРУЗКИ ---
-        const userLang = tg.initDataUnsafe.user && tg.initDataUnsafe.user.language_code ? tg.initDataUnsafe.user.language_code.toLowerCase() : 'ru';
+        let userLang = 'ru';
+        if (tg.initDataUnsafe && tg.initDataUnsafe.user && tg.initDataUnsafe.user.language_code) {
+            userLang = tg.initDataUnsafe.user.language_code.toLowerCase();
+        }
         const langKey = userLang.startsWith('ru') ? 'ru' : 'en';
         const texts = LOCALE_DATA[langKey] || LOCALE_DATA['ru'];
         // ------------------------------------------
         
         button.disabled = true;
-        button.textContent = texts.button_loading; // Используем локализованный текст загрузки
+        button.textContent = texts.button_loading;
         
         try {
             // 1. СНАЧАЛА отправляем сигнал боту
@@ -174,29 +205,23 @@
             
             console.log('sendData and shareToStory called');
             
-            // Восстанавливаем кнопку (на случай, если пользователь вернется)
+            // Восстанавливаем кнопку
             setTimeout(() => {
                 button.disabled = false;
-                button.textContent = texts.button_text; // Используем локализованный текст
+                button.textContent = texts.button_text;
             }, 5000);
             
         } catch (error) {
             console.error('Error:', error);
             button.disabled = false;
-            button.textContent = texts.button_text; // Используем локализованный текст
+            button.textContent = texts.button_text;
         }
     }
     
-    // --- ❗️ ИСПРАВЛЕНА ОШИБКА СИНТАКСИСА ❗️ ---
     document.addEventListener('DOMContentLoaded', () => {
         initTelegramApp();
         document.getElementById('shareButton').addEventListener('click', shareStory);
     });
-    // ------------------------------------------
 </script>
 </body>
 </html>
-
-
-
-
